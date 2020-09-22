@@ -1,146 +1,161 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:tcard/tcard.dart';
+import 'package:flip_card/flip_card.dart';
+import 'package:flutter_tindercard/flutter_tindercard.dart';
 
-void main() {
-  runApp(
-    MaterialApp(
-      home: SwancyApp(),
-    ),
-  );
-}
+void main() => runApp(MyApp());
 
-class SwancyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
-  _SwancyAppState createState() => _SwancyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MySwancy(),
+    );
+  }
 }
 
-class _SwancyAppState extends State<SwancyApp> {
-  int _selectedIndex = 0;
-  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text(
-      'Index 0: Home',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 1: Business',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
-  ];
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key, this.title}) : super(key: key);
+  final String title;
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+  List<Widget> cardList;
+  CardController controller;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
-  List<String> images = [
-    'https://gank.io/images/5ba77f3415b44f6c843af5e149443f94',
-    'https://gank.io/images/02eb8ca3297f4931ab64b7ebd7b5b89c',
-    'https://gank.io/images/31f92f7845f34f05bc10779a468c3c13',
-    'https://gank.io/images/b0f73f9527694f44b523ff059d8a8841',
-    'https://gank.io/images/1af9d69bc60242d7aa2e53125a4586ad',
-  ];
-
+  //Use this to trigger swap.
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> cards = List.generate(
-      images.length,
-        (int index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                offset: Offset(0, 17),
-                blurRadius: 23.0,
-                spreadRadius: -13.0,
-                color: Colors.black54,
-              )
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.0),
-            child: Image.network(
-              images[index],
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
-    );
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
-        leading: Image.asset('assets/Menu.png'),
-        actions: [
-          Image.asset('assets/Filter.png'),
-        ],
+        title: Text(widget.title),
       ),
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Positioned(
-            right: -200,
-            top: -200,
-            child: Container(
-              width: 550,
-              height: 550,
-              decoration: BoxDecoration(color: Color(0xffF0F4F8), shape: BoxShape.circle),
+      body: Center(
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: TinderSwapCard(
+            orientation: AmassOrientation.TOP,
+            totalNum: 3,
+            stackNum: 3,
+            swipeEdge: 4.0,
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
+            maxHeight: MediaQuery.of(context).size.width * 0.9,
+            minWidth: MediaQuery.of(context).size.width * 0.8,
+            minHeight: MediaQuery.of(context).size.width * 0.8,
+            cardBuilder: (context, index) => FlipCard(
+              key: Key('flip$index'),
+              direction: FlipDirection.HORIZONTAL,
+              speed: 1000,
+              onFlipDone: (status) {
+                print(status);
+              },
+              front: Container(
+                height: 300,
+                width: 300,
+                decoration: BoxDecoration(
+                  color: Color(0xFF006666),
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text('Front', style: Theme.of(context).textTheme.headline),
+                    Text('Click here to flip back', style: Theme.of(context).textTheme.body1),
+                  ],
+                ),
+              ),
+              back: Container(
+                height: 300,
+                width: 300,
+                decoration: BoxDecoration(
+                  color: Color(0xFF006666),
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text('Back', style: Theme.of(context).textTheme.headline),
+                    Text('Click here to flip front', style: Theme.of(context).textTheme.body1),
+                  ],
+                ),
+              ),
             ),
+            cardController: controller = CardController(),
+            swipeUpdateCallback: (DragUpdateDetails details, Alignment align) {
+              /// Get swiping card's alignment
+              if (align.x < 0) {
+                //Card is LEFT swiping
+              } else if (align.x > 0) {
+                //Card is RIGHT swiping
+              }
+            },
+            swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
+              /// Get orientation & index of swiped card!
+            },
           ),
-          Positioned(
-            right: -50,
-            top: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-            ),
-          ),
-          Positioned(
-            left: -200,
-            bottom: -200,
-            child: Container(
-              width: 550,
-              height: 550,
-              decoration: BoxDecoration(color: Color(0xffF0F4F8), shape: BoxShape.circle),
-            ),
-          ),
-          Align(
-            child: TCard(
-              size: Size(400, 600),
-              cards: cards,
-            ),
-          )
-        ],
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.time),
-            title: Text(""),
+    );
+  }
+}
+
+class MySwancy extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("trying"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox.expand(
+          child: Center(
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 40,
+                  child: myCard(),
+                ),
+                Positioned(
+                  left: 30,
+                  child: myCard(),
+                ),
+                Positioned(
+                  left: 20,
+                  child: myCard(),
+                ),
+                Positioned(
+                  left: 10,
+                  child: myCard(),
+                ),
+              ],
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.conversation_bubble),
-            title: Text(""),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.person),
-            title: Text(""),
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.red,
-        onTap: _onItemTapped,
+        ),
+      ),
+    );
+  }
+
+  Card myCard() {
+    return Card(
+      child: Container(
+        width: 200,
+        height: 400,
+        child: Center(
+          child: Text("xxxx"),
+        ),
       ),
     );
   }
